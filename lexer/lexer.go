@@ -38,6 +38,10 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	// whitespace in this programming language doesn't have any meaning. just
+	// ignore it
+	l.skipWhitespace()
+
 	switch l.ch {
 	case '=':
 		tok = newToken(token.ASSIGN, l.ch)
@@ -58,10 +62,63 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+	default:
+		if isLetter(l.ch) {
+			// first, attempt to read the identifier
+			tok.Literal = l.readIdentifier()
+			// second, determine the token type if it is in the list of keywords
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.INT
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
 	}
 
 	l.readChar()
 	return tok
+}
+
+// find and build an identifier by continously reading characters
+// this function will advance the lexer's state until it reaches a
+// non-letter-character
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+	for isLetter(l.ch) {
+		l.readChar()
+	}
+
+	return l.input[position:l.position]
+}
+
+// Check if a character is a valid letter in an identifier
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// Check if a character is a number
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
+}
+
+// find a build a number by reading characters
+func (l *Lexer) readNumber() string {
+	position := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+// read the input and skip any whitespace characters like spaces, tabs,
+// newlines, and carriage returns.
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
 }
 
 // helper function to create a Token given some type and literal

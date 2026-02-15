@@ -38,3 +38,22 @@ const (
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
 )
+
+// define the unique keywords in the language
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
+}
+
+// helper function that determines if an identifier is a keyword or just an
+// identifier
+func LookupIdent(ident string) TokenType {
+	// in go, performing a map lookup returns two values, the value and an error
+	// flag. we can check the error flag in the same line
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+
+	// if we can't find the identifier in the map, then it must be an identifier
+	return IDENT
+}
