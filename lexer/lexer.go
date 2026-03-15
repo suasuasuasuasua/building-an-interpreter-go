@@ -124,16 +124,6 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
-// Check if a character is a valid letter in an identifier
-func isLetter(ch byte) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
-}
-
-// Check if a character is a number
-func isDigit(ch byte) bool {
-	return '0' <= ch && ch <= '9'
-}
-
 // find a build a number by reading characters
 func (l *Lexer) readNumber() string {
 	position := l.position
@@ -160,6 +150,16 @@ func (l *Lexer) peekChar() byte {
 	} else {
 		return l.input[l.readPosition]
 	}
+}
+
+// Check if a character is a valid letter in an identifier
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// Check if a character is a number
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
 }
 
 // helper function to create a Token given some type and literal
