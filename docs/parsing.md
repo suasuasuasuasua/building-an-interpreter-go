@@ -4,6 +4,10 @@ The purpose of the parser is to read in tokens from the lexer and create an
 abstract syntax tree. At this stage in the interpreter, we are checking the
 sequence of characters to ensure that the tokens conform to language's grammar.
 
+The goal is to create an unambiguous absract syntax tree. Moreover, operators
+with higher precedence should be lower in the tree, which means that these are
+evaluated first and with higher priority.
+
 ## Pratt Parsing
 
 Pratt parsing is a top-down parsing technique that associates precedence
