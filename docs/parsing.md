@@ -19,6 +19,60 @@ may require significant restructuring of the grammar.
 The Pratt parser requires token handlers to be registered and relies on
 abstraction and recursion to automatically handle the parsing.
 
+The following statement is parsed like this.
+
+```go
+{
+    "-a * b",
+    "((-a) * b)",
+},
+```
+
+1. the parser calls `ParseProgram` which calls `parseStatement` for each of the
+   statements, which are separated by semilcolons, until the end of file is
+   encountered
+2. this example is an expression statement and `parseExpressionStatement` is
+   called
+3. the first call to `parseExpression` with `LOWEST` will have `-` as the token
+   type. we call `parsePrefixExpression` which then calls `parseIdentifier` for
+   `a`. the inner call for `-` terminates because the `PREFIX` precedence is
+   less than the `PRODUCT` precedence
+
+   ```go
+   ast.PrefixExpression{
+       Token: token.MINUS,
+       Operator: "-"
+       Right: ast.Identifier{
+           Token: token.IDENT,
+           Value: "a"
+       }
+   }
+   ```
+
+4. The first call to `parseExpression` from `-` goes into the loop because the
+   precedence `LOWEST` is less than `PRODUCT`. We advance the lexer and wrap the
+   prefix expression (`leftExp`) inside of an infix expression. The left is
+   set equal to the prefix expression while the right is set to the identifier
+
+   ```go
+   ast.InfixExpression{
+       Token: token.ASTERISK,
+       Operator: "*",
+       Left: ast.PrefixExpression{
+           Token: token.MINUS,
+           Operator: "-"
+           Right: ast.Identifier{
+               Token: token.IDENT,
+               Value: "a",
+           },
+       },
+       Right: ast.Identifier{
+           Token: token.IDENT,
+           Value: "a",
+       },
+   }
+   ```
+
 ## Prefix Operators
 
 The prefix operators have the following form. It precedes an expression.
@@ -26,10 +80,6 @@ The prefix operators have the following form. It precedes an expression.
 ```text
 <prefix-operator><expression>
 ```
-
-In the parser code, the idea is to register `parsePrefixExpression` which
-creates a prefix expression using the current token, as well as the following
-expression.
 
 ## Infix Operators
 
