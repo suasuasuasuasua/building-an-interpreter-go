@@ -106,7 +106,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 		return
 	}
 
-	t.Errorf("parser had errors %d errors", len(errors))
+	t.Errorf("parser had %d errors", len(errors))
 	for _, msg := range errors {
 		t.Errorf("parser error: %q", msg)
 	}
@@ -379,6 +379,26 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{
 			"3 < 5 == true",
 			"((3 < 5) == true)",
+		},
+		{
+			"1 + (2 + 3) + 4",
+			"((1 + (2 + 3)) + 4)",
+		},
+		{
+			"(5 + 5) * 2",
+			"((5 + 5) * 2)",
+		},
+		{
+			"2 / (5 + 5)",
+			"(2 / (5 + 5))",
+		},
+		{
+			"-(5 + 5)",
+			"(-(5 + 5))",
+		},
+		{
+			"!(true == true)",
+			"(!(true == true))",
 		},
 	}
 
